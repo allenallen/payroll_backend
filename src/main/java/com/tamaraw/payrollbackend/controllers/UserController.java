@@ -2,6 +2,7 @@ package com.tamaraw.payrollbackend.controllers;
 
 import com.tamaraw.payrollbackend.models.WebUser;
 import com.tamaraw.payrollbackend.repositories.WebUserRepository;
+import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ public class UserController {
     private WebUserRepository webUserRepository;
 
     @GetMapping("/{username}")
+    @TrackExecutionTime
     public ResponseEntity<WebUser> getUser(@PathVariable String username) {
-        System.out.println("Called getUser " + username);
         WebUser webUser = webUserRepository.findUserByUsername(username);
 
         if (webUser == null) {

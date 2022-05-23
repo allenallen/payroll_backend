@@ -2,6 +2,9 @@ package com.tamaraw.payrollbackend.controllers;
 
 import com.tamaraw.payrollbackend.models.Employee;
 import com.tamaraw.payrollbackend.repositories.EmployeeRepository;
+import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +20,15 @@ public class EmployeeController {
     private EmployeeRepository employeeRepository;
 
     @GetMapping(value = {"", "/"})
+    @TrackExecutionTime
     public ResponseEntity<List<Employee>> getEmployees() {
-        System.out.println("Called getEmployees");
         List<Employee> employees = employeeRepository.findAll();
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
     @PostMapping(value = {"", "/"})
+    @TrackExecutionTime
     public ResponseEntity<Employee> create(@RequestBody Employee employee) {
-        System.out.println("Called create employee");
         try {
             employee = employeeRepository.save(employee);
         } catch (Exception e) {
