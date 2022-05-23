@@ -29,6 +29,14 @@ public class Employee extends AuditableEntity{
         this.birthday = birthday;
     }
 
+    public void update(Employee employee) {
+        setFirstName(employee.getFirstName());
+        setLastName(employee.getLastName());
+        setAddress(employee.getAddress());
+        setBirthday(employee.getBirthday());
+        setContactNumber(employee.getContactNumber());
+    }
+
     public String getFirstName() {
         return firstName;
     }

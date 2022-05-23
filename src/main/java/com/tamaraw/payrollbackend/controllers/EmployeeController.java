@@ -3,14 +3,13 @@ package com.tamaraw.payrollbackend.controllers;
 import com.tamaraw.payrollbackend.models.Employee;
 import com.tamaraw.payrollbackend.repositories.EmployeeRepository;
 import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/employee")
@@ -31,6 +30,25 @@ public class EmployeeController {
     public ResponseEntity<Employee> create(@RequestBody Employee employee) {
         try {
             employee = employeeRepository.save(employee);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(employee, HttpStatus.OK);
+    }
+
+    @PutMapping("/{employeeId}")
+    @TrackExecutionTime
+    public ResponseEntity<Employee> update(@PathVariable Long employeeId, @RequestBody Employee employee) {
+        try {
+            Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
+            if (employeeOptional.isPresent()) {
+                Employee employeeDb = employeeOptional.get();
+                employeeDb.update(employee);
+                employee = employeeRepository.save(employeeDb);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
