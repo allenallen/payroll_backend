@@ -1,5 +1,6 @@
 package com.tamaraw.payrollbackend.controllers;
 
+import com.tamaraw.payrollbackend.models.ApiResponse;
 import com.tamaraw.payrollbackend.models.Employee;
 import com.tamaraw.payrollbackend.repositories.EmployeeRepository;
 import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
@@ -20,26 +21,26 @@ public class EmployeeController {
 
     @GetMapping(value = {"", "/"})
     @TrackExecutionTime
-    public ResponseEntity<List<Employee>> getEmployees() {
+    public ResponseEntity<ApiResponse<List<Employee>>> getEmployees() {
         List<Employee> employees = employeeRepository.findAll();
-        return new ResponseEntity<>(employees, HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>("Success", employees), HttpStatus.OK);
     }
 
     @PostMapping(value = {"", "/"})
     @TrackExecutionTime
-    public ResponseEntity<Employee> create(@RequestBody Employee employee) {
+    public ResponseEntity<ApiResponse<Employee>> create(@RequestBody Employee employee) {
         try {
             employee = employeeRepository.save(employee);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(employee, HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>("Success", employee), HttpStatus.OK);
     }
 
     @PutMapping("/{employeeId}")
     @TrackExecutionTime
-    public ResponseEntity<Employee> update(@PathVariable Long employeeId, @RequestBody Employee employee) {
+    public ResponseEntity<ApiResponse<Employee>> update(@PathVariable Long employeeId, @RequestBody Employee employee) {
         try {
             Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
             if (employeeOptional.isPresent()) {
@@ -47,13 +48,14 @@ public class EmployeeController {
                 employeeDb.update(employee);
                 employee = employeeRepository.save(employeeDb);
             } else {
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new ApiResponse<>(String.format("Employee with id %s not found!", employeeId),
+                        null), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(employee, HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>("Success", employee), HttpStatus.OK);
     }
 
 }
