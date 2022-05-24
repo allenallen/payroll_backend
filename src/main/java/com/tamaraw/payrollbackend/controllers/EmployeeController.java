@@ -2,6 +2,8 @@ package com.tamaraw.payrollbackend.controllers;
 
 import com.tamaraw.payrollbackend.models.ApiResponse;
 import com.tamaraw.payrollbackend.models.Employee;
+import com.tamaraw.payrollbackend.models.EmployeeCompensation;
+import com.tamaraw.payrollbackend.repositories.EmployeeCompensationRepository;
 import com.tamaraw.payrollbackend.repositories.EmployeeRepository;
 import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private EmployeeCompensationRepository employeeCompensationRepository;
 
     @GetMapping("/{employeeId}")
     @TrackExecutionTime
@@ -39,6 +44,8 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Employee>> create(@RequestBody Employee employee) {
         try {
             employee = employeeRepository.save(employee);
+            EmployeeCompensation employeeCompensation = new EmployeeCompensation(employee);
+            employeeCompensationRepository.save(employeeCompensation);
         } catch (DataIntegrityViolationException e) {
             e.printStackTrace();
             return new ResponseEntity<>(new ApiResponse<>(String.format("Employee number %s already exists", employee.getEmployeeNumber()), null), HttpStatus.INTERNAL_SERVER_ERROR);
