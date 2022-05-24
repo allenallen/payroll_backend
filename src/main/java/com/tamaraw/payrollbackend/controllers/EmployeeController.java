@@ -5,6 +5,7 @@ import com.tamaraw.payrollbackend.models.Employee;
 import com.tamaraw.payrollbackend.repositories.EmployeeRepository;
 import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,13 @@ public class EmployeeController {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @GetMapping("/{employeeId}")
+    @TrackExecutionTime
+    public ResponseEntity<ApiResponse<Employee>> getEmployee(@PathVariable Long employeeId) {
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        return employee.map(value -> new ResponseEntity<>(new ApiResponse<>("Success", value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new ApiResponse<>(String.format("Employee with ID %s not found", employeeId), null), HttpStatus.NOT_FOUND));
+    }
+
     @GetMapping(value = {"", "/"})
     @TrackExecutionTime
     public ResponseEntity<ApiResponse<List<Employee>>> getEmployees() {
@@ -31,6 +39,9 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Employee>> create(@RequestBody Employee employee) {
         try {
             employee = employeeRepository.save(employee);
+        } catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ApiResponse<>(String.format("Employee number %s already exists", employee.getEmployeeNumber()), null), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -48,9 +59,11 @@ public class EmployeeController {
                 employeeDb.update(employee);
                 employee = employeeRepository.save(employeeDb);
             } else {
-                return new ResponseEntity<>(new ApiResponse<>(String.format("Employee with id %s not found!", employeeId),
-                        null), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(new ApiResponse<>(String.format("Employee with id %s not found!", employeeId), null), HttpStatus.INTERNAL_SERVER_ERROR);
             }
+        } catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ApiResponse<>(String.format("Employee number %s already exists", employee.getEmployeeNumber()), null), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -58,4 +71,21 @@ public class EmployeeController {
         return new ResponseEntity<>(new ApiResponse<>("Success", employee), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{employeeId}")
+    @TrackExecutionTime
+    public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long employeeId) {
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        if (employee.isPresent()) {
+            try {
+                employeeRepository.deleteById(employeeId);
+                return new ResponseEntity<>(new ApiResponse<>("Successfully deleted", null), HttpStatus.OK);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>(new ApiResponse<>(String.format("Employee with id %s not found!", employeeId),
+                    null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
