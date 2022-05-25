@@ -84,7 +84,8 @@ public class EmployeeController {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
         if (employee.isPresent()) {
             try {
-                employeeRepository.deleteById(employeeId);
+                EmployeeCompensation employeeCompensation = employeeCompensationRepository.findEmployeeCompensationByEmployee(employee.get());
+                employeeCompensationRepository.delete(employeeCompensation);
                 return new ResponseEntity<>(new ApiResponse<>("Successfully deleted", null), HttpStatus.OK);
             } catch (Exception e) {
                 e.printStackTrace();

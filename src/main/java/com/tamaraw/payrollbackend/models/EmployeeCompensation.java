@@ -1,15 +1,12 @@
 package com.tamaraw.payrollbackend.models;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 public class EmployeeCompensation extends AuditableEntity{
 
-    @OneToOne(cascade = CascadeType.REMOVE, targetEntity = Employee.class)
+    @OneToOne(cascade = CascadeType.REMOVE, targetEntity = Employee.class, orphanRemoval = true)
     private Employee employee;
 
     private BigDecimal daily;
