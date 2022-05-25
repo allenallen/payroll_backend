@@ -1,6 +1,8 @@
 package com.tamaraw.payrollbackend;
 
+import com.tamaraw.payrollbackend.models.DeductionType;
 import com.tamaraw.payrollbackend.models.WebUser;
+import com.tamaraw.payrollbackend.repositories.DeductionTypeRepository;
 import com.tamaraw.payrollbackend.repositories.WebUserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,9 +17,12 @@ public class PayrollBackendApplication {
 	}
 
 	@Bean
-	public CommandLineRunner loadData(WebUserRepository webUserRepository) {
+	public CommandLineRunner loadData(WebUserRepository webUserRepository, DeductionTypeRepository deductionTypeRepository) {
 		return args -> {
 			webUserRepository.save(new WebUser("admin", "welcome123"));
+			deductionTypeRepository.save(new DeductionType("SSS"));
+			deductionTypeRepository.save(new DeductionType("PAGIBIG"));
+			deductionTypeRepository.save(new DeductionType("PHILHEALTH"));
 		};
 	}
 
