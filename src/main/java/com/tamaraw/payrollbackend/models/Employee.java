@@ -20,6 +20,9 @@ public class Employee extends AuditableEntity{
 
     private LocalDate birthday;
 
+    @Column(columnDefinition = "boolean default true")
+    private Boolean active = true;
+
     public Employee(String firstName, String lastName, String contactNumber, String address, String employeeNumber, LocalDate birthday) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -36,6 +39,14 @@ public class Employee extends AuditableEntity{
         setBirthday(employee.getBirthday());
         setContactNumber(employee.getContactNumber());
         setEmployeeNumber(employee.getEmployeeNumber());
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public String getFirstName() {

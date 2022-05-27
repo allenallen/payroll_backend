@@ -34,8 +34,15 @@ public class EmployeeController {
 
     @GetMapping(value = {"", "/"})
     @TrackExecutionTime
-    public ResponseEntity<ApiResponse<List<Employee>>> getEmployees() {
-        List<Employee> employees = employeeRepository.findAll();
+    public ResponseEntity<ApiResponse<List<Employee>>> getEmployees(@RequestParam(required = false) Boolean queryAll) {
+        List<Employee> employees;
+
+        if(queryAll != null && queryAll) {
+            employees = employeeRepository.getAllOrdered();
+        } else {
+            employees = employeeRepository.getAllActive();
+        }
+
         return new ResponseEntity<>(new ApiResponse<>("Success", employees), HttpStatus.OK);
     }
 
@@ -80,13 +87,14 @@ public class EmployeeController {
 
     @DeleteMapping("/{employeeId}")
     @TrackExecutionTime
-    public ResponseEntity<ApiResponse<String>> delete(@PathVariable Long employeeId) {
+    public ResponseEntity<ApiResponse<String>> setActiveOrInactive(@PathVariable Long employeeId) {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
         if (employee.isPresent()) {
             try {
-                EmployeeCompensation employeeCompensation = employeeCompensationRepository.findEmployeeCompensationByEmployee(employee.get());
-                employeeCompensationRepository.delete(employeeCompensation);
-                return new ResponseEntity<>(new ApiResponse<>("Successfully deleted", null), HttpStatus.OK);
+                Employee employee1 = employee.get();
+                employee1.setActive(!employee1.getActive());
+                employeeRepository.save(employee1);
+                return new ResponseEntity<>(new ApiResponse<>("", null), HttpStatus.OK);
             } catch (Exception e) {
                 e.printStackTrace();
                 return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
