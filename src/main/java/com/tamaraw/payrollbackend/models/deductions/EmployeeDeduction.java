@@ -1,5 +1,6 @@
 package com.tamaraw.payrollbackend.models.deductions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tamaraw.payrollbackend.models.AuditableEntity;
 
 import javax.persistence.Entity;
@@ -14,12 +15,18 @@ public class EmployeeDeduction extends AuditableEntity {
     private BigDecimal totalAmount;
 
     @ManyToOne
+    @JsonIgnore
     private EmployeeDeductions employeeDeductions;
 
     public EmployeeDeduction(String deductionType, BigDecimal totalAmount, EmployeeDeductions employeeDeductions) {
         this.deductionType = deductionType;
         this.totalAmount = totalAmount;
         this.employeeDeductions = employeeDeductions;
+    }
+
+    public void update(EmployeeDeduction employeeDeduction) {
+        this.deductionType = employeeDeduction.getDeductionType();
+        this.totalAmount = employeeDeduction.getTotalAmount();
     }
 
     public String getDeductionType() {

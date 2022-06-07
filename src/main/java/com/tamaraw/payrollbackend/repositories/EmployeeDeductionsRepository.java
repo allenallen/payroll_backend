@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface EmployeeDeductionsRepository extends JpaRepository<EmployeeDeductions, Long> {
 
-    List<EmployeeDeductions> findEmployeeDeductionsByEmployee(Employee employee);
+    EmployeeDeductions findEmployeeDeductionsByEmployee(Employee employee);
 
 }

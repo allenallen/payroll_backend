@@ -3,21 +3,22 @@ package com.tamaraw.payrollbackend.models.deductions;
 import com.tamaraw.payrollbackend.models.AuditableEntity;
 import com.tamaraw.payrollbackend.models.Employee;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 public class EmployeeDeductions extends AuditableEntity {
 
-    @ManyToOne
+    @OneToOne
     private Employee employee;
 
-    @OneToMany(mappedBy = "employeeDeductions", cascade = CascadeType.DETACH)
+    @OneToMany(mappedBy = "employeeDeductions", cascade = CascadeType.ALL)
     private List<EmployeeDeduction> employeeDeductions = new ArrayList<>();
+
+    public EmployeeDeductions(Employee employee) {
+        this.employee = employee;
+    }
 
     public Employee getEmployee() {
         return employee;

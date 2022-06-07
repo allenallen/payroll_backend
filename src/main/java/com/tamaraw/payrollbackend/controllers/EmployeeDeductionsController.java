@@ -40,7 +40,7 @@ public class EmployeeDeductionsController {
 
     @GetMapping("/{employeeId}")
     @TrackExecutionTime
-    public ResponseEntity<ApiResponse<List<EmployeeDeductions>>> getByEmployee(@PathVariable Long employeeId) {
+    public ResponseEntity<ApiResponse<EmployeeDeductions>> getByEmployee(@PathVariable Long employeeId) {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
         if (employee.isEmpty()) {
             return new ResponseEntity<>(new ApiResponse<>("Employee with ID " + employeeId + " not found!", null), HttpStatus.NOT_FOUND);
@@ -48,9 +48,46 @@ public class EmployeeDeductionsController {
         return new ResponseEntity<>(new ApiResponse<>("", employeeDeductionsRepository.findEmployeeDeductionsByEmployee(employee.get())), HttpStatus.OK);
     }
 
-    @PutMapping("/{deductionsId}")
+    @PostMapping("/{deductionsId}")
     @TrackExecutionTime
-    public ResponseEntity<ApiResponse<>>
+    public ResponseEntity<ApiResponse<EmployeeDeductions>> addEmployeeDeduction(@PathVariable Long deductionsId,
+                                                                                @RequestBody EmployeeDeduction employeeDeduction) {
+        EmployeeDeductions employeeDeductions = employeeDeductionsRepository.getById(deductionsId);
+        employeeDeduction.setEmployeeDeductions(employeeDeductions);
+        employeeDeductions.addEmployeeDeduction(employeeDeduction);
+        try {
+            employeeDeductions = employeeDeductionsRepository.save(employeeDeductions);
+            return new ResponseEntity<>(new ApiResponse<>("", employeeDeductions), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{employeeDeductionId}")
+    @TrackExecutionTime
+    public ResponseEntity<ApiResponse<EmployeeDeduction>> updateDeduction(@PathVariable Long employeeDeductionId,
+                                                                          @RequestBody EmployeeDeduction employeeDeduction) {
+        EmployeeDeduction deduction = employeeDeductionRepository.getById(employeeDeductionId);
+        deduction.update(employeeDeduction);
+        try {
+            deduction = employeeDeductionRepository.save(deduction);
+            return new ResponseEntity<>(new ApiResponse<>("", deduction), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @DeleteMapping("/{employeeDeductionId}")
+    @TrackExecutionTime
+    public ResponseEntity<ApiResponse<String>> deleteDeduction(@PathVariable Long employeeDeductionId) {
+        try {
+            employeeDeductionRepository.deleteById(employeeDeductionId);
+            return new ResponseEntity<>(new ApiResponse<>("Successfully deleted", null), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>(e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     private List<EmployeeDeductionsTotalDto> map(List<EmployeeDeductions> employeeDeductions) {
         Map<EmployeeDto, BigDecimal> employeeDeductionsMap = new HashMap<>();

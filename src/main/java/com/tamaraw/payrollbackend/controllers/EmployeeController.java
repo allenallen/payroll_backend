@@ -3,7 +3,9 @@ package com.tamaraw.payrollbackend.controllers;
 import com.tamaraw.payrollbackend.models.ApiResponse;
 import com.tamaraw.payrollbackend.models.Employee;
 import com.tamaraw.payrollbackend.models.EmployeeCompensation;
+import com.tamaraw.payrollbackend.models.deductions.EmployeeDeductions;
 import com.tamaraw.payrollbackend.repositories.EmployeeCompensationRepository;
+import com.tamaraw.payrollbackend.repositories.EmployeeDeductionsRepository;
 import com.tamaraw.payrollbackend.repositories.EmployeeRepository;
 import com.tamaraw.payrollbackend.utils.TrackExecutionTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class EmployeeController {
     @Autowired
     private EmployeeCompensationRepository employeeCompensationRepository;
 
+    @Autowired
+    private EmployeeDeductionsRepository employeeDeductionsRepository;
+
     @GetMapping("/{employeeId}")
     @TrackExecutionTime
     public ResponseEntity<ApiResponse<Employee>> getEmployee(@PathVariable Long employeeId) {
@@ -37,7 +42,7 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<List<Employee>>> getEmployees(@RequestParam(required = false) Boolean queryAll) {
         List<Employee> employees;
 
-        if(queryAll != null && queryAll) {
+        if (queryAll != null && queryAll) {
             employees = employeeRepository.getAllOrdered();
         } else {
             employees = employeeRepository.getAllActive();
@@ -53,6 +58,8 @@ public class EmployeeController {
             employee = employeeRepository.save(employee);
             EmployeeCompensation employeeCompensation = new EmployeeCompensation(employee);
             employeeCompensationRepository.save(employeeCompensation);
+            EmployeeDeductions employeeDeductions = new EmployeeDeductions(employee);
+            employeeDeductionsRepository.save(employeeDeductions);
         } catch (DataIntegrityViolationException e) {
             e.printStackTrace();
             return new ResponseEntity<>(new ApiResponse<>(String.format("Employee number %s already exists", employee.getEmployeeNumber()), null), HttpStatus.INTERNAL_SERVER_ERROR);
