@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import java.util.Date;
+import java.util.Objects;
 
 @MappedSuperclass
 public abstract class AuditableEntity {
@@ -21,7 +22,8 @@ public abstract class AuditableEntity {
     @UpdateTimestamp
     private Date updatedDate;
 
-    public AuditableEntity() {}
+    public AuditableEntity() {
+    }
 
     public Long getId() {
         return id;
@@ -45,5 +47,18 @@ public abstract class AuditableEntity {
 
     public void setUpdatedDate(Date updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AuditableEntity that = (AuditableEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
